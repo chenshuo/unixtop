@@ -68,7 +68,8 @@
 #include <sys/vfs.h>
 
 #include <sys/param.h>		/* for HZ */
-#include <asm/page.h>		/* for PAGE_SHIFT */
+//#include <asm/page.h>		/* for PAGE_SHIFT */
+#define PAGE_SHIFT 12
 
 #if 0
 #include <linux/proc_fs.h>	/* for PROC_SUPER_MAGIC */
