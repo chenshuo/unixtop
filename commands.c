@@ -751,17 +751,17 @@ cmd_order_cpu(globalstate *gstate)
 }
 
 int
-cmd_order_pid(globalstate *gstate)
+cmd_order_res(globalstate *gstate)
 
 {
-    return cmd_order_x(gstate, "pid", NULL);
+    return cmd_order_x(gstate, "res", NULL);
 }
 
 int
 cmd_order_mem(globalstate *gstate)
 
 {
-    return cmd_order_x(gstate, "mem", "size", NULL);
+    return cmd_order_x(gstate, "size", NULL);
 }
 
 int
@@ -913,7 +913,7 @@ command command_table[] = {
     { 'H', cmd_threads, "toggle the display of individual threads" },
     { 't', cmd_threads, NULL },
     { 'M', cmd_order_mem, "sort by memory usage" },
-    { 'N', cmd_order_pid, "sort by process id" },
+    { 'N', cmd_order_res, "sort by RES" },
     { 'P', cmd_order_cpu, "sort by CPU usage" },
     { 'S', cmd_system, "toggle the display of system processes" },
     { 'T', cmd_order_time, "sort by CPU time" },

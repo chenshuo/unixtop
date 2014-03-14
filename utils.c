@@ -517,18 +517,18 @@ format_percent(double v)
     static char result[10];
 
     /* enumerate the possibilities */
-    if (v < 0 || v >= 100000.)
+    if (v < 0 || v >= 10000.)
     {
 	/* we dont want to try extreme values */
 	strcpy(result, "  ???");
     }
     else if (v > 99.99)
     {
-	sprintf(result, "%5.0f", v);
+	sprintf(result, "%4.0f", v);
     }
     else
     {
-	sprintf(result, "%5.2f", v);
+	sprintf(result, "%4.1f", v);
     }
 
     return result;
@@ -613,20 +613,34 @@ format_k(long amt)
     static char retarray[NUM_STRINGS][16];
     static int index = 0;
     register char *ret;
-    register char tag = 'K';
+    register char tag = 'k';
 
     ret = retarray[index];
     index = (index + 1) % NUM_STRINGS;
 
     if (amt >= 10000)
     {
-	amt = (amt + 512) / 1024;
-	tag = 'M';
-	if (amt >= 10000)
-	{
-	    amt = (amt + 512) / 1024;
-	    tag = 'G';
-	}
+	tag = 'm';
+
+        if (amt < 100 * 1024)
+        {
+          snprintf(ret, sizeof(retarray[index])-1, "%.1f%c", amt / 1024.0, tag);
+          return ret;
+        }
+        else
+        {
+          amt = (amt + 512) / 1024;
+          if (amt >= 10000)
+          {
+            tag = 'g';
+            if (amt < 100 * 1024)
+            {
+              snprintf(ret, sizeof(retarray[index])-1, "%.1f%c", amt / 1024.0, tag);
+              return ret;
+            }
+            amt = (amt + 512) / 1024;
+          }
+        }
     }
 
     snprintf(ret, sizeof(retarray[index])-1, "%ld%c", amt, tag);

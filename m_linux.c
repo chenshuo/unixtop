@@ -91,11 +91,13 @@ extern char *myname;
 struct top_proc
 {
     pid_t pid;
+    pid_t tgid;
     uid_t uid;
     char *name;
     int pri, nice, threads;
     unsigned long size, rss, shared;	/* in k */
-    int state;
+    int state, processor;
+    unsigned long wchan;
     unsigned long time;
     unsigned long start_time;
     double pcpu;
@@ -108,7 +110,7 @@ struct top_proc
 #define NPROCSTATES 7
 static char *state_abbrev[NPROCSTATES+1] =
 {
-    "", "run", "sleep", "disk", "zomb", "stop", "swap",
+    "", "R", "S", "D", "Z", "T", "W",
     NULL
 };
 
@@ -164,10 +166,10 @@ static char fmt_header[] =
 "  PID X         THR PRI NICE  SIZE   RES STATE   TIME    CPU COMMAND";
 
 static char proc_header_thr[] =
-"  PID %-9s THR PRI NICE  SIZE   RES   SHR STATE   TIME    CPU COMMAND";
+ "  PID %-9s THR  PR  NI  SIZE   RES   SHR S  P   TIME  CPU%% COMMAND";
 
 static char proc_header_nothr[] =
-"  PID %-9s PRI NICE  SIZE   RES   SHR STATE   TIME    CPU COMMAND";
+"  TID %-9s TGID  PR  NI  SIZE   RES   SHR S  P   TIME  CPU%% COMMAND";
 
 /* these are names given to allowed sorting orders -- first is default */
 char *ordernames[] = 
@@ -811,8 +813,6 @@ read_one_proc_stat(pid_t pid, pid_t taskpid, struct top_proc *proc, struct proce
     proc->size = bytetok(strtoul(p, &p, 10));	/* vsize */
     proc->rss = pagetok(strtoul(p, &p, 10));	/* rss */
 
-#if 0
-    /* for the record, here are the rest of the fields */
     p = skip_token(p);				/* skip rlim */
     p = skip_token(p);				/* skip start_code */
     p = skip_token(p);				/* skip end_code */
@@ -823,9 +823,11 @@ read_one_proc_stat(pid_t pid, pid_t taskpid, struct top_proc *proc, struct proce
     p = skip_token(p);				/* skip sigblocked */
     p = skip_token(p);				/* skip sigignore */
     p = skip_token(p);				/* skip sigcatch */
-    p = skip_token(p);				/* skip wchan */
-#endif
-
+    proc->wchan = strtoul(p, &p, 10);		/* wchan */
+    p = skip_token(p);				/* skip nswap */
+    p = skip_token(p);				/* skip cnswap */
+    p = skip_token(p);				/* skip exit_signal */
+    proc->processor = strtol(p, &p, 10);	/* processor */
 }
 
 static int show_usernames;
@@ -966,6 +968,7 @@ get_process_info(struct system_info *si,
 			{
 			    taskproc = new_proc();
 			    taskproc->pid = taskpid;
+                            taskproc->tgid = pid;
 			    taskproc->time = 0;
 			    hash_add_pid(tasktable, taskpid, (void *)taskproc);
 			}
@@ -1114,24 +1117,28 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
 
     if (show_threads)
     {
+"  TID USERNAME TGID  PRI NI   SIZE   RES   SHR STATE P  TIME    CPU COMMAND";
 	snprintf(fmt, sizeof(fmt),
-		 "%5d %-8.8s  %3d %4d %5s %5s %5s %-5s %6s %5s%% %s",
+		 "%5d %-8.8s %5d %3d %3d %5s %5s %5s %s %2d %6s %5s %s",
 		 p->pid,
 		 userbuf,
+                 p->tgid,
 		 p->pri < -99 ? -99 : p->pri,
 		 p->nice,
 		 format_k(p->size),
 		 format_k(p->rss),
 		 format_k(p->shared),
 		 state_abbrev[p->state],
+                 p->processor,
 		 format_time(p->time / HZ),
 		 format_percent(p->pcpu * 100.0),
 		 p->name);
     }
     else
     {
+"  PID USERNAME  THR PRI NI   SIZE   RES   SHR STATE P  TIME    CPU COMMAND";
 	snprintf(fmt, sizeof(fmt),
-		 "%5d %-8.8s %4d %3d %4d %5s %5s %5s %-5s %6s %5s%% %s",
+		 "%5d %-8.8s %4d %3d %3d %5s %5s %5s %s %2d %6s %5s %s",
 		 p->pid,
 		 userbuf,
 		 p->threads <= 9999 ? p->threads : 9999,
@@ -1141,6 +1148,7 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
 		 format_k(p->rss),
 		 format_k(p->shared),
 		 state_abbrev[p->state],
+                 p->processor,
 		 format_time(p->time / HZ),
 		 format_percent(p->pcpu * 100.0),
 		 p->name);
