@@ -1887,7 +1887,8 @@ display_pagerend()
 
     screen_standout("Hit any key to continue: ");
     fflush(stdout);
-    (void) read(0, &ch, 1);
+    ssize_t n = read(0, &ch, 1);
+    (void)n;
 }
 
 void
@@ -1916,7 +1917,8 @@ display_pager(char *fmt, ...)
 	    {
 		screen_standout("...More...");
 		fflush(stdout);
-		(void) read(0, &readch, 1);
+		ssize_t n = read(0, &readch, 1);
+                (void)n;
 		putchar('\r');
 		switch(readch)
 		{

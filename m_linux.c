@@ -1117,7 +1117,7 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
 
     if (show_threads)
     {
-"  TID USERNAME TGID  PRI NI   SIZE   RES   SHR STATE P  TIME    CPU COMMAND";
+//"  TID USERNAME TGID  PRI NI   SIZE   RES   SHR STATE Processor  TIME    CPU COMMAND"
 	snprintf(fmt, sizeof(fmt),
 		 "%5d %-8.8s %5d %3d %3d %5s %5s %5s %s %2d %6s %5s %s",
 		 p->pid,
@@ -1136,7 +1136,7 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
     }
     else
     {
-"  PID USERNAME  THR PRI NI   SIZE   RES   SHR STATE P  TIME    CPU COMMAND";
+//"  PID USERNAME  THR PRI NI   SIZE   RES   SHR STATE Processor  TIME    CPU COMMAND"
 	snprintf(fmt, sizeof(fmt),
 		 "%5d %-8.8s %4d %3d %3d %5s %5s %5s %s %2d %6s %5s %s",
 		 p->pid,
