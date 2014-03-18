@@ -771,6 +771,13 @@ cmd_order_time(globalstate *gstate)
     return cmd_order_x(gstate, "time");
 }
 
+int
+cmd_order_threads(globalstate *gstate)
+
+{
+    return cmd_order_x(gstate, "threads");
+}
+
 #ifdef ENABLE_KILL
 
 int
@@ -917,6 +924,7 @@ command command_table[] = {
     { 'P', cmd_order_cpu, "sort by CPU usage" },
     { 'S', cmd_system, "toggle the display of system processes" },
     { 'T', cmd_order_time, "sort by CPU time" },
+    { 'J', cmd_order_threads, "sort by threads number" },
     { 'U', cmd_useruid, "toggle the display of usernames or uids" },
     { 'c', cmd_command, "display processes by command name" },
     { 'd', cmd_displays, "change number of displays to show" },

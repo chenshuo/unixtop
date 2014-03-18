@@ -551,10 +551,12 @@ format_percent(double v)
  */
 
 char *
-format_time(long seconds)
+format_time(long ticks)
 
 {
-    static char result[10];
+    static char result[16];
+    long seconds = ticks / HZ;
+    long fact = ticks % HZ;
 
     /* sanity protection */
     if (seconds < 0 || seconds > (99999l * 360l))
@@ -564,19 +566,19 @@ format_time(long seconds)
     else if (seconds >= (1000l * 60l))
     {
 	/* alternate (slow) method displaying hours and tenths */
-	sprintf(result, "%5.1fH", (double)seconds / (double)(60l * 60l));
+	sprintf(result, "%5.1fh   ", (double)seconds / (double)(60l * 60l));
 
 	/* It is possible that the sprintf took more than 6 characters.
 	   If so, then the "H" appears as result[6].  If not, then there
 	   is a \0 in result[6].  Either way, it is safe to step on.
 	 */
-	result[6] = '\0';
+	//result[6] = '\0';
     }
     else
     {
 	/* standard method produces MMM:SS */
 	/* we avoid printf as must as possible to make this quick */
-	sprintf(result, "%3ld:%02ld", seconds / 60l, seconds % 60l);
+	sprintf(result, "%3ld:%02ld.%02ld", seconds / 60l, seconds % 60l, fact);
     }
     return(result);
 }

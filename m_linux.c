@@ -163,17 +163,17 @@ static char *swapnames[NSWAPSTATS+1] =
 };
 
 static char fmt_header[] =
-"  PID X         THR PRI NICE  SIZE   RES STATE   TIME    CPU COMMAND";
+"  PID X         THR PRI NICE  SIZE   RES STATE    TIME    CPU COMMAND";
 
 static char proc_header_thr[] =
- "  PID %-9s THR  PR  NI  SIZE   RES   SHR S  P   TIME  CPU%% COMMAND";
+ "  PID %-9s THR  PR  NI  SIZE   RES   SHR S  P    TIME+   CPU%% COMMAND";
 
 static char proc_header_nothr[] =
-"  TID %-9s TGID  PR  NI  SIZE   RES   SHR S  P   TIME  CPU%% COMMAND";
+"  TID %-9s TGID  PR  NI  SIZE   RES   SHR S  P    TIME+   CPU%% COMMAND";
 
 /* these are names given to allowed sorting orders -- first is default */
 char *ordernames[] = 
-{"cpu", "size", "res", "time", "command", NULL};
+{"cpu", "size", "res", "time", "command", "threads", NULL};
 
 /* forward definitions for comparison functions */
 int compare_cpu();
@@ -181,6 +181,7 @@ int compare_size();
 int compare_res();
 int compare_time();
 int compare_cmd();
+int compare_threads();
 
 int (*proc_compares[])() = {
     compare_cpu,
@@ -188,6 +189,7 @@ int (*proc_compares[])() = {
     compare_res,
     compare_time,
     compare_cmd,
+    compare_threads,
     NULL };
 	
 /*=SYSTEM STATE INFO====================================================*/
@@ -1117,7 +1119,7 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
 
     if (show_threads)
     {
-//"  TID USERNAME TGID  PRI NI   SIZE   RES   SHR STATE Processor  TIME    CPU COMMAND"
+//"  TID USERNAME TGID  PRI NI   SIZE   RES   SHR STATE Processor  TIME+    CPU COMMAND"
 	snprintf(fmt, sizeof(fmt),
 		 "%5d %-8.8s %5d %3d %3d %5s %5s %5s %s %2d %6s %5s %s",
 		 p->pid,
@@ -1130,13 +1132,13 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
 		 format_k(p->shared),
 		 state_abbrev[p->state],
                  p->processor,
-		 format_time(p->time / HZ),
+		 format_time(p->time),
 		 format_percent(p->pcpu * 100.0),
 		 p->name);
     }
     else
     {
-//"  PID USERNAME  THR PRI NI   SIZE   RES   SHR STATE Processor  TIME    CPU COMMAND"
+//"  PID USERNAME  THR PRI NI   SIZE   RES   SHR STATE Processor  TIME+    CPU COMMAND"
 	snprintf(fmt, sizeof(fmt),
 		 "%5d %-8.8s %4d %3d %3d %5s %5s %5s %s %2d %6s %5s %s",
 		 p->pid,
@@ -1149,7 +1151,7 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
 		 format_k(p->shared),
 		 state_abbrev[p->state],
                  p->processor,
-		 format_time(p->time / HZ),
+		 format_time(p->time),
 		 format_percent(p->pcpu * 100.0),
 		 p->name);
     }
@@ -1186,6 +1188,7 @@ format_next_process(caddr_t handle, char *(*get_userid)(int))
 #define ORDERKEY_RSSIZE  if ((result = p2->rss - p1->rss) == 0)
 #define ORDERKEY_MEM     if ((result = p2->size - p1->size) == 0)
 #define ORDERKEY_NAME    if ((result = strcmp(p1->name, p2->name)) == 0)
+#define ORDERKEY_THREAD  if ((result = p2->threads - p1->threads) == 0)
 
 /* Now the array that maps process state to a weight */
 
@@ -1327,6 +1330,34 @@ compare_cmd (
     p2 = *pp2;
 
     ORDERKEY_NAME
+    ORDERKEY_PCTCPU
+    ORDERKEY_CPTICKS
+    ORDERKEY_STATE
+    ORDERKEY_PRIO
+    ORDERKEY_RSSIZE
+    ORDERKEY_MEM
+    ;
+
+    return result == 0 ? 0 : result < 0 ? -1 : 1;
+  }
+
+/* compare_threads - the comparison function for sorting by number of threads */
+
+int
+compare_threads (
+	       struct top_proc **pp1,
+	       struct top_proc **pp2)
+  {
+    register struct top_proc *p1;
+    register struct top_proc *p2;
+    register long result;
+    double dresult;
+
+    /* remove one level of indirection */
+    p1 = *pp1;
+    p2 = *pp2;
+
+    ORDERKEY_THREAD
     ORDERKEY_PCTCPU
     ORDERKEY_CPTICKS
     ORDERKEY_STATE
