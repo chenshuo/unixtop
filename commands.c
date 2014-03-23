@@ -926,7 +926,7 @@ command command_table[] = {
     { 'T', cmd_order_time, "sort by CPU time" },
     { 'J', cmd_order_threads, "sort by threads number" },
     { 'U', cmd_useruid, "toggle the display of usernames or uids" },
-    { 'c', cmd_command, "display processes by command name" },
+    { '/', cmd_command, "display processes by command name" },
     { 'd', cmd_displays, "change number of displays to show" },
     { 'f', cmd_cmdline, "toggle the display of full command paths" },
     { 'i', cmd_idle, "toggle the displaying of idle processes" },

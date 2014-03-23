@@ -145,10 +145,12 @@ static char *kernelnames[NKERNELSTATS+1] =
 #define MEMSHARED  2
 #define MEMBUFFERS 3
 #define MEMCACHED  4
-#define NMEMSTATS  5
+#define MEMREALUSED  5
+#define MEMREALFREE  6
+#define NMEMSTATS  7
 static char *memorynames[NMEMSTATS+1] =
 {
-    "K used, ", "K free, ", "K shared, ", "K buffers, ", "K cached",
+    "K used, ", "K free, ", "K shared, ", "K buffers, ", "K cached, ", "K real used, ", "K real free",
     NULL
 };
 
@@ -641,6 +643,10 @@ get_system_info(struct system_info *info)
 	    }
 	}
 	close(fd);
+
+        long avail = memory_stats[MEMBUFFERS] + memory_stats[MEMCACHED];
+        memory_stats[MEMREALUSED] = memory_stats[MEMUSED] - avail;
+        memory_stats[MEMREALFREE] = memory_stats[MEMFREE] + avail;
     }
 
     /* get vm related stuff */

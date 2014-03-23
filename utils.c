@@ -561,22 +561,22 @@ format_time(long ticks)
     /* sanity protection */
     if (seconds < 0 || seconds > (99999l * 360l))
     {
-	strcpy(result, "   ???");
+	strcpy(result, "      ???");
     }
-    else if (seconds >= (1000l * 60l))
+    else if (seconds >= (100l * 3600l))
     {
-	/* alternate (slow) method displaying hours and tenths */
-	sprintf(result, "%5.1fh   ", (double)seconds / (double)(60l * 60l));
-
-	/* It is possible that the sprintf took more than 6 characters.
-	   If so, then the "H" appears as result[6].  If not, then there
-	   is a \0 in result[6].  Either way, it is safe to step on.
-	 */
-	//result[6] = '\0';
+      /* alternate (slow) method displaying hours and tenths */
+      sprintf(result, "%5.1fh   ", (double)seconds / (double)(60l * 60l));
+    }
+    else if (seconds >= (10l * 3600l))
+    {
+        long hours = seconds / 3600l;
+        long minutes = (seconds % 3600l)/60;
+	sprintf(result, "%3dh%02ld:%02ld", hours, minutes, seconds % 60l);
     }
     else
     {
-	/* standard method produces MMM:SS */
+	/* standard method produces MMM:SS.xx */
 	/* we avoid printf as must as possible to make this quick */
 	sprintf(result, "%3ld:%02ld.%02ld", seconds / 60l, seconds % 60l, fact);
     }
