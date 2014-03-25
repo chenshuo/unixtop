@@ -58,7 +58,7 @@
 #define  Y_KERNEL       3
 #define  X_MEM		8
 #define  Y_MEM		3
-#define  X_SWAP		6
+#define  X_SWAP		8
 #define  Y_SWAP		4
 #define  Y_MESSAGE	4
 #define  X_HEADER	0

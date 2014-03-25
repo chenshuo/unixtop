@@ -119,7 +119,7 @@ quit(int status)
 
 {
     screen_end();
-    chdir("/tmp");
+    (void) chdir("/tmp");
     exit(status);
     /* NOTREACHED */
 }

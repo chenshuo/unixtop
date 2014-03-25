@@ -563,16 +563,16 @@ format_time(long ticks)
     {
 	strcpy(result, "      ???");
     }
-    else if (seconds >= (100l * 3600l))
+    else if (seconds >= (1000l * 3600l))
     {
       /* alternate (slow) method displaying hours and tenths */
-      sprintf(result, "%5.1fh   ", (double)seconds / (double)(60l * 60l));
+      sprintf(result, "%6.1fh  ", (double)seconds / (double)(60l * 60l));
     }
     else if (seconds >= (10l * 3600l))
     {
         long hours = seconds / 3600l;
         long minutes = (seconds % 3600l)/60;
-	sprintf(result, "%3dh%02ld:%02ld", hours, minutes, seconds % 60l);
+	sprintf(result, "%3ldh%02ld:%02ld", hours, minutes, seconds % 60l);
     }
     else
     {
@@ -620,16 +620,18 @@ format_k(long amt)
     ret = retarray[index];
     index = (index + 1) % NUM_STRINGS;
 
-    if (amt >= 10000)
+    if (amt >= 100000)
     {
 	tag = 'm';
 
+        /*
         if (amt < 100 * 1024)
         {
           snprintf(ret, sizeof(retarray[index])-1, "%.1f%c", amt / 1024.0, tag);
           return ret;
         }
         else
+        */
         {
           amt = (amt + 512) / 1024;
           if (amt >= 10000)
@@ -645,7 +647,14 @@ format_k(long amt)
         }
     }
 
-    snprintf(ret, sizeof(retarray[index])-1, "%ld%c", amt, tag);
+    if (tag == 'k')
+    {
+      snprintf(ret, sizeof(retarray[index])-1, "%ld", amt);
+    }
+    else
+    {
+      snprintf(ret, sizeof(retarray[index])-1, "%ld%c", amt, tag);
+    }
 
     return(ret);
 }

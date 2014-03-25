@@ -140,27 +140,31 @@ static char *kernelnames[NKERNELSTATS+1] =
     NULL
 };
 
-#define MEMUSED    0
-#define MEMFREE    1
-#define MEMSHARED  2
-#define MEMBUFFERS 3
-#define MEMCACHED  4
-#define MEMREALUSED  5
-#define MEMREALFREE  6
-#define NMEMSTATS  7
+#define MEMTOTAL   0
+#define MEMUSED    1
+#define MEMFREE    2
+#define MEMSHARED  3
+#define MEMBUFFERS 4
+#define MEMCACHED  5
+#define MEMBUFFERSCACHED  6
+#define MEMREALUSED  7
+#define MEMREALFREE  8
+#define NMEMSTATS  9
 static char *memorynames[NMEMSTATS+1] =
 {
-    "K used, ", "K free, ", "K shared, ", "K buffers, ", "K cached, ", "K real used, ", "K real free",
+    "K total, ", "K used, ", "K free, ", "K shared, ", "K buffers, ", "K cached, ",
+    "K buffers+cached, ", "K real used, ", "K real free",
     NULL
 };
 
-#define SWAPUSED   0
-#define SWAPFREE   1
-#define SWAPCACHED 2
-#define NSWAPSTATS 3
+#define SWAPTOTAL  0
+#define SWAPUSED   1
+#define SWAPFREE   2
+#define SWAPCACHED 3
+#define NSWAPSTATS 4
 static char *swapnames[NSWAPSTATS+1] =
 {
-    "K used, ", "K free, ", "K cached",
+    "K total, ", "K used, ", "K free, ", "K cached",
     NULL
 };
 
@@ -217,7 +221,7 @@ static hash_table *ptable;
 static hash_table *tasktable;
 static struct top_proc **pactive;
 static struct top_proc **nextactive;
-static unsigned int activesize = 0;
+static int activesize = 0;
 static time_t boottime = -1;
 static int have_task = 0;
 
@@ -597,6 +601,7 @@ get_system_info(struct system_info *info)
 		{
 		    p = skip_token(p);
 		    memtotal = strtoul(p, &p, 10);
+		    memory_stats[MEMTOTAL] = memtotal;
 		}
 		else if (!mem && memtotal > 0 && strncmp(p, "MemFree:", 8) == 0)
 		{
@@ -624,6 +629,7 @@ get_system_info(struct system_info *info)
 		{
 		    p = skip_token(p);
 		    swaptotal = strtoul(p, &p, 10);
+		    swap_stats[SWAPTOTAL] = swaptotal;
 		}
 		else if (!swap && swaptotal > 0 && strncmp(p, "SwapFree:", 9) == 0)
 		{
@@ -645,6 +651,9 @@ get_system_info(struct system_info *info)
 	close(fd);
 
         long avail = memory_stats[MEMBUFFERS] + memory_stats[MEMCACHED];
+        memory_stats[MEMBUFFERSCACHED] = avail;
+        memory_stats[MEMBUFFERS] = 0;
+        memory_stats[MEMCACHED] = 0;
         memory_stats[MEMREALUSED] = memory_stats[MEMUSED] - avail;
         memory_stats[MEMREALFREE] = memory_stats[MEMFREE] + avail;
     }
