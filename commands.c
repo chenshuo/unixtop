@@ -886,6 +886,21 @@ cmd_mode(globalstate *gstate)
 }
 
 int
+cmd_showme(globalstate *gstate)
+{
+    if (gstate->pselect.uid == -1)
+    {
+        gstate->pselect.uid = getuid();
+    }
+    else
+    {
+        gstate->pselect.uid = -1;
+    }
+    display_header(2);
+    return CMD_REFRESH;
+}
+
+int
 cmd_system(globalstate *gstate)
 
 {
@@ -928,13 +943,13 @@ command command_table[] = {
     { 'U', cmd_useruid, "toggle the display of usernames or uids" },
     { '/', cmd_command, "display processes by command name" },
     { 'd', cmd_displays, "change number of displays to show" },
-    { 'f', cmd_cmdline, "toggle the display of full command paths" },
+    { 'c', cmd_cmdline, "toggle the display of full command paths" },
     { 'i', cmd_idle, "toggle the displaying of idle processes" },
     { 'I', cmd_idle, NULL },
 #ifdef ENABLE_KILL
     { 'k', cmd_kill, "kill processes; send a signal to a list of processes" },
 #endif
-    { 'm', cmd_mode, "toggle between display modes" },
+    { 'm', cmd_showme, "toggle between display all users and current user" },
     { 'n', cmd_number, "change number of processes to display" },
     { '#', cmd_number, NULL },
     { 'o', cmd_order, "specify sort order (see below)" },
