@@ -5,7 +5,7 @@
 /* #undef DEBUG */
 
 /* Default delay */
-#define DEFAULT_DELAY 3
+#define DEFAULT_DELAY 5
 
 /* Default number of processes to display */
 #define DEFAULT_TOPN 30
@@ -217,10 +217,10 @@
 #define NOMINAL_TOPN 40
 
 /* Define the major OS revision number. */
-#define OSMAJOR 3
+#define OSMAJOR 5
 
 /* Define the OS revision. */
-#define OSREV 32023generic
+#define OSREV 5451v7l
 
 /* Define to the address where bug reports for this package should be sent. */
 #define PACKAGE_BUGREPORT ""
@@ -251,7 +251,7 @@
 #define TPUTS_PUTC_ARGTYPE int
 
 /* Define the system hardware platform */
-#define UNAME_HARDWARE "x86_64"
+#define UNAME_HARDWARE "armv7l"
 
 /* Include code that utilizes extensions */
 /* #undef WITH_EXT */
